@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const chessboard = document.getElementById("chessboard");
   const turnElement = document.getElementById("turn");
+
   let selectedPiece = null;
   let currentPlayer = 1;
 
@@ -21,6 +22,13 @@ document.addEventListener("DOMContentLoaded", function () {
     piece.className = "piece";
     piece.draggable = false;
     return piece;
+  }
+
+  function addWinningImage(square) {
+    const image = document.createElement("img");
+    image.src = "./assets/winningimg.png";
+    image.className = "piece";
+    square.appendChild(image);
   }
 
   function handleSquareClick(row, col) {
@@ -66,7 +74,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (toRow === 7 && toCol === 0) {
       turnElement.textContent = `Player ${currentPlayer} Wins!`;
+
       chessboard.removeEventListener("click", handleSquareClick);
+
       return;
     }
     updateTurn();
@@ -155,7 +165,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (row === 0 && col === 7) {
           const rook = createPiece(true);
+
           square.appendChild(rook);
+        }
+
+        if (row === 7 && col === 0) {
+          addWinningImage(square);
         }
 
         chessboard.appendChild(square);
