@@ -12,17 +12,10 @@ app.use(express.static(__dirname + "/public"));
 
 // Socket.io logic for handling game state and events.
 io.on("connection", (socket) => {
-  // Handle player connections and game state synchronization here.
-  // You'll need to implement the game logic and Socket.io events.
+  console.log("A user connected");
 
-  // Example:
-  socket.on("move", (data) => {
-    // Handle a player's move here and broadcast the updated game state to all players.
-    io.emit("gameState", updatedGameState);
-  });
-
-  socket.on("disconnect", () => {
-    // Handle player disconnections and clean up game state if necessary.
+  socket.on("sendGameState", (data) => {
+    socket.emit("receiveGameState", data);
   });
 });
 

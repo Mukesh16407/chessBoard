@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const chessboard = document.getElementById("chessboard");
   const turnElement = document.getElementById("turn");
   const timerElement = document.getElementById("timer");
-
+  const socket = io();
   let timer;
   let secondsRemaining = 30;
   let timeoutThreshold = 0; // Time in seconds to declare timeout, set to 0 for no timeout
@@ -10,6 +10,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let selectedPiece = null;
   let currentPlayer = 1;
+
+  // Function to send a message to the server
+  function sendMessage(
+    selectedPieceRow,
+    selectedPiecCol,
+    row,
+    col,
+    currPlayer
+  ) {
+    if (currPlayer == currentPlayer) {
+      socket.emit("sendGameState", {
+        selectedPieceRow,
+        selectedPiecCol,
+        row,
+        col,
+      });
+    }
+    updateTurn();
+  }
+  // Listen for the received message from the server
+  socket.on("receiveGameState", (currentState) => {
+    const { selectedPieceRow, selectedPiecCol, row, col } = currentState;
+    moveRook(selectedPieceRow, selectedPiecCol, row, col);
+  });
 
   function createSquare(row, col, isWhite) {
     const square = document.createElement("div");
@@ -68,7 +92,14 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleSquareClick(row, col) {
     if (selectedPiece) {
       if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
-        moveRook(selectedPiece.row, selectedPiece.col, row, col);
+        //moveRook(selectedPiece.row, selectedPiece.col, row, col);
+        sendMessage(
+          selectedPiece.row,
+          selectedPiece.col,
+          row,
+          col,
+          currentPlayer
+        );
       }
       clearPossibleMoves();
       selectedPiece = null;
@@ -115,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       return;
     }
-    updateTurn();
+    //updateTurn();
   }
   function updateTurn() {
     if (currentPlayer === 1) {
