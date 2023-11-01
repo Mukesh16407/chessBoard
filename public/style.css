@@ -4,12 +4,22 @@ body {
    align-items: center;
    height: 100vh;
    margin: 0;
+   background-color: black;
 }
+
+*{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+   color: white;
+}
+
 
 #chessboard {
    display: grid;
    grid-template-columns: repeat(8, 50px);
    grid-template-rows: repeat(8, 50px);
+ 
 }
 
 .square {
@@ -40,7 +50,7 @@ body {
 .possible-move {
    width: 30px;
    height: 30px;
-   background-color: rgba(0, 255, 0, 0.5);
+   background-color: rgba(85, 138, 85, 0.5);
    position: absolute;
 }
 
