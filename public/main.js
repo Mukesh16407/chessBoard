@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let timer;
   let secondsRemaining = 30;
+  let timeoutThreshold = 0; // Time in seconds to declare timeout, set to 0 for no timeout
+  let gameIsOver = false;
 
   let selectedPiece = null;
   let currentPlayer = 1;
@@ -47,10 +49,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (secondsRemaining <= 0) {
       clearInterval(timer);
       // Handle timeout or move validation here
+      handleTimeout();
     }
     updateTimerDisplay();
   }
-
+  function handleTimeout() {
+    if (timeoutThreshold > 0 && secondsRemaining <= -timeoutThreshold) {
+      // Player took too long, their opponent wins
+      clearInterval(timer);
+      gameIsOver = true;
+    }
+  }
   // Function to update the timer display
   function updateTimerDisplay() {
     timerElement.textContent = `${secondsRemaining} seconds Remaning`;
@@ -92,15 +101,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const toSquare = chessboard.querySelector(
       `[data-row="${toRow}"][data-col="${toCol}"]`
     );
-    if (currentPlayer === "white") {
-      clearInterval(timer);
-      currentPlayer = "black";
-      startTimer();
-    } else {
-      clearInterval(timer);
-      currentPlayer = "white";
-      startTimer();
-    }
 
     if (fromSquare && toSquare) {
       const rook = fromSquare.querySelector(".piece");
@@ -119,9 +119,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function updateTurn() {
     if (currentPlayer === 1) {
+      clearInterval(timer);
       currentPlayer = 2;
+      startTimer();
     } else {
+      clearInterval(timer);
       currentPlayer = 1;
+      startTimer();
     }
     turnElement.textContent = `Player ${currentPlayer}\'s turn`;
   }
