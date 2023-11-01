@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
   const chessboard = document.getElementById("chessboard");
   const turnElement = document.getElementById("turn");
+  const timerElement = document.getElementById("timer");
+
+  let timer;
+  let secondsRemaining = 30;
 
   let selectedPiece = null;
   let currentPlayer = 1;
@@ -29,6 +33,27 @@ document.addEventListener("DOMContentLoaded", function () {
     image.src = "./assets/winningimg.png";
     image.className = "piece";
     square.appendChild(image);
+  }
+
+  function startTimer() {
+    secondsRemaining = 30;
+    updateTimerDisplay();
+    timer = setInterval(updateTimer, 1000);
+  }
+
+  // Function to update the timer
+  function updateTimer() {
+    secondsRemaining--;
+    if (secondsRemaining <= 0) {
+      clearInterval(timer);
+      // Handle timeout or move validation here
+    }
+    updateTimerDisplay();
+  }
+
+  // Function to update the timer display
+  function updateTimerDisplay() {
+    timerElement.textContent = `${secondsRemaining} seconds Remaning`;
   }
 
   function handleSquareClick(row, col) {
@@ -67,6 +92,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const toSquare = chessboard.querySelector(
       `[data-row="${toRow}"][data-col="${toCol}"]`
     );
+    if (currentPlayer === "white") {
+      clearInterval(timer);
+      currentPlayer = "black";
+      startTimer();
+    } else {
+      clearInterval(timer);
+      currentPlayer = "white";
+      startTimer();
+    }
 
     if (fromSquare && toSquare) {
       const rook = fromSquare.querySelector(".piece");
@@ -74,6 +108,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (toRow === 7 && toCol === 0) {
       turnElement.textContent = `Player ${currentPlayer} Wins!`;
+      clearInterval(timer); // Remove the timer
+      timerElement.textContent = "";
 
       chessboard.removeEventListener("click", handleSquareClick);
 
@@ -177,7 +213,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
-
+  clearInterval(timer); // Remove the timer
+  timerElement.textContent = "";
   initializeChessboard();
   turnElement.textContent = "Player 1's turn";
 });
