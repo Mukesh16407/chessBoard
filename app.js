@@ -15,7 +15,7 @@ io.on("connection", (socket) => {
   console.log("A user connected");
 
   socket.on("sendGameState", (data) => {
-    socket.emit("receiveGameState", data);
+    socket.broadcast.emit("receiveGameState", data);
   });
 });
 

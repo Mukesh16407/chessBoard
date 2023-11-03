@@ -2,7 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const chessboard = document.getElementById("chessboard");
   const turnElement = document.getElementById("turn");
   const timerElement = document.getElementById("timer");
+
   const socket = io();
+
   let timer;
   let secondsRemaining = 30;
   let timeoutThreshold = 0; // Time in seconds to declare timeout, set to 0 for no timeout
@@ -12,27 +14,27 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentPlayer = 1;
 
   // Function to send a message to the server
-  function sendMessage(
-    selectedPieceRow,
-    selectedPiecCol,
-    row,
-    col,
-    currPlayer
-  ) {
-    if (currPlayer == currentPlayer) {
-      socket.emit("sendGameState", {
-        selectedPieceRow,
-        selectedPiecCol,
-        row,
-        col,
-      });
-    }
+  function sendMessage(selectedPieceRow, selectedPiecCol, row, col) {
+    socket.emit("sendGameState", {
+      selectedPieceRow,
+      selectedPiecCol,
+      row,
+      col,
+    });
+
     updateTurn();
+    clearInterval(timer);
+    timerElement.textContent = "";
+    chessboard.addEventListener("click", handleSquareClick);
   }
   // Listen for the received message from the server
   socket.on("receiveGameState", (currentState) => {
     const { selectedPieceRow, selectedPiecCol, row, col } = currentState;
     moveRook(selectedPieceRow, selectedPiecCol, row, col);
+    clearInterval(timer);
+    startTimer();
+    updateTurn(row, col);
+    chessboard.removeEventListener("click", handleSquareClick);
   });
 
   function createSquare(row, col, isWhite) {
@@ -82,6 +84,8 @@ document.addEventListener("DOMContentLoaded", function () {
       // Player took too long, their opponent wins
       clearInterval(timer);
       gameIsOver = true;
+      turnElement.textContent = `Player ${currentPlayer}\ lost due to time limit`;
+      chessboard.removeEventListener("click", handleSquareClick);
     }
   }
   // Function to update the timer display
@@ -92,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleSquareClick(row, col) {
     if (selectedPiece) {
       if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
-        //moveRook(selectedPiece.row, selectedPiece.col, row, col);
+        moveRook(selectedPiece.row, selectedPiece.col, row, col);
         sendMessage(
           selectedPiece.row,
           selectedPiece.col,
@@ -141,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
       turnElement.textContent = `Player ${currentPlayer} Wins!`;
       clearInterval(timer); // Remove the timer
       timerElement.textContent = "";
+      turnElement.textContent = `Player ${currentPlayer} Wins!`;
 
       chessboard.removeEventListener("click", handleSquareClick);
 
@@ -148,15 +153,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     //updateTurn();
   }
-  function updateTurn() {
+  function updateTurn(toRow, toCol) {
     if (currentPlayer === 1) {
-      clearInterval(timer);
       currentPlayer = 2;
-      startTimer();
     } else {
-      clearInterval(timer);
       currentPlayer = 1;
-      startTimer();
+    }
+
+    if (toRow === 7 && toCol === 0) {
+      turnElement.textContent = `Player ${currentPlayer} Wins!`;
+      clearInterval(timer); // Remove the timer
+      timerElement.textContent = "";
+      turnElement.textContent = `Player ${currentPlayer} Wins!`;
+
+      chessboard.removeEventListener("click", handleSquareClick);
+
+      return;
     }
     turnElement.textContent = `Player ${currentPlayer}\'s turn`;
   }
